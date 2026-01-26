@@ -1,2 +1,8 @@
-# audio-to-text-whisper
-OpenAI Whisperを使った音声ファイルの文字起こしツール
+# Whisper文字起こしツール
+
+OpenAIのWhisperモデルを使った音声→テキスト変換ツールです。
+
+## 機能
+- MP3/WAVなどの音声ファイルを入力
+- 日本語・英語など多言語対応の文字起こし
+- SRT字幕出力可能
