@@ -4,10 +4,10 @@ from srt import Subtitle
 import srt
 
 # modelは使っているグラフィックカードに応じて変更する
-model = whisper.load_model("tiny")
+model = whisper.load_model("medium")
 
 # sample.m4aには読み込みたい音声ファイルを指定する
-audio = whisper.load_audio(R"C:\Users\lunat\OneDrive\ドキュメント\Python\test3.mp4")
+audio = whisper.load_audio(R"C:\Users\lunat\OneDrive\ドキュメント\Python\predator.mp4")
 
 # 再生時間の長い音声ファイルを冒頭30秒だけ試したいときは以下のコードを有効にする
 #audio = whisper.pad_or_trim(audio)
@@ -32,9 +32,11 @@ for data in seginfo:
     out_text.append(out_line)
 
 # srt形式のファイルをcsv形式に編集して保存する。sampleの部分は自由に変更できる
-with open("sampl" + ".csv", mode="w", encoding="utf-8") as f:
-    origin = srt.compose(out_text)
-    origin = origin.replace(",",".")
-    origin = origin.replace("\n",",")
-    origin = origin.replace(",,","\n")
-    f.write(origin)
+# with open("sample" + ".srt", mode="w", encoding="utf-8") as f:
+#     origin = srt.compose(out_text)
+#     origin = origin.replace(",",".")
+#     origin = origin.replace("\n",",")
+#     origin = origin.replace(",,","\n")
+#     f.write(out_text)
+with open("predator" + ".srt", mode="w", encoding="utf-8") as f:
+    f.write(srt.compose(out_text))
