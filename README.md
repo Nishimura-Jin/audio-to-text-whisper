@@ -11,7 +11,7 @@ OpenAIのWhisperモデルを使った音声→テキスト変換ツールです�
 - Python 3.8以上
 - GPUがあれば高速（CPUでも可）
 
-使い方（基本）
+## 使い方（基本）
 
 1.スクリプト内の音声ファイルパスを変更
 audio = whisper.load_audio(r"C:\path\to\your\audio.mp4")  # ← ここを自分のファイルに
@@ -19,7 +19,7 @@ audio = whisper.load_audio(r"C:\path\to\your\audio.mp4")  # ← ここを自分�
 2.実行
 whisper_srt.py→ 同じフォルダに predator.srt（または指定した名前）のSRTファイルが出力されます。
 
-カスタマイズ例
+## カスタマイズ例
 
 ・モデルサイズを変更（精度↑、速度↓）
   model = whisper.load_model("large-v3")  # medium → large-v3 / turbo など
