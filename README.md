@@ -17,7 +17,7 @@ OpenAIのWhisperモデルを使った音声→テキスト変換ツールです�
 audio = whisper.load_audio(r"C:\path\to\your\audio.mp4")  # ← ここを自分のファイルに
 
 2.実行
-whisper_srt.py→ 同じフォルダに predator.srt（または指定した名前）のSRTファイルが出力されます。
+whisper_srt.py→ 同じフォルダに sample.srt（または指定した名前）のSRTファイルが出力されます。
 
 ## カスタマイズ例
 
@@ -25,8 +25,7 @@ whisper_srt.py→ 同じフォルダに predator.srt（または指定した名�
   model = whisper.load_model("large-v3")  # medium → large-v3 / turbo など
   
 ・出力ファイル名をカスタム
-　with open("my_custom_subtitle.srt", mode="w", encoding="utf-8") as f:
-　    f.write(srt.compose(out_text))
+　with open("sample.srt", mode="w", encoding="utf-8") as f: ←sampleの部分を出力したい名前に変更可能
 
 ・英語音声に変更（日本語以外で使いたい場合）
   result = model.transcribe(audio, verbose=True, language="en")
