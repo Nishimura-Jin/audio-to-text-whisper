@@ -38,6 +38,7 @@ for data in seginfo:
 #     origin = origin.replace("\n",",")
 #     origin = origin.replace(",,","\n")
 #     f.write(out_text)
-with open("predator" + ".srt", mode="w", encoding="utf-8") as f:
+with open("sample" + ".srt", mode="w", encoding="utf-8") as f:
     f.write(srt.compose(out_text))
+
 
