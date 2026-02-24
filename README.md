@@ -58,4 +58,4 @@ python app.py "your_audio_file.mp4" --clean --format all
 
 ```.txt``` (プレーンテキスト)
 
-```.tsv``` / ```.json ```(データ解析用)
+```.tsv``` / ```.json``` (データ解析用)
