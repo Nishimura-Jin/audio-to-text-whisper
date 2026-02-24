@@ -52,10 +52,10 @@ python app.py "your_audio_file.mp4" --clean --format all
 
 ## 📂 対応フォーマット
 
-.srt (字幕ファイル)
+```.srt ```(字幕ファイル)
 
-.vtt (Web字幕)
+```.vtt ```(Web字幕)
 
-.txt (プレーンテキスト)
+```.txt``` (プレーンテキスト)
 
-.tsv / .json (データ解析用)
+```.tsv``` / ```.json ```(データ解析用)
