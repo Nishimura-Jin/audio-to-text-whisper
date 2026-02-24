@@ -36,15 +36,19 @@ OpenAIの高性能音声認識モデル「Whisper」を使用し、**「文字�
 ## 🚀 使い方
 
 **準備**
-Bash
+```Bash
 pip install openai-whisper torch tqdm
+```
+
 **基本的な実行**
 
-Bash
+```Bash
 python app.py "your_audio_file.mp4"
+```
 フィラー除去をして、全形式で保存する場合
-Bash
+```Bash
 python app.py "your_audio_file.mp4" --clean --format all
+```
 
 ## 📂 対応フォーマット
 
