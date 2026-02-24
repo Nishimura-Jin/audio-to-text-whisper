@@ -1,31 +1,52 @@
 # Whisper文字起こしツール
 
-OpenAIのWhisperモデルを使った音声→テキスト変換ツールです。
+OpenAIの高性能音声認識モデル「Whisper」を使用し、**「文字起こし ＋ フィラー除去 ＋ 多形式保存」**をワンストップで行える実用的なCLIツールです。
 
-## 機能
-- MP4/WAVなどの音声・動画ファイルを入力
-- 日本語・英語など多言語対応の文字起こし
-- SRT字幕出力可能
+## 🌟 このツールの特徴
+高性能モデルの採用: 最新の turbo モデルを使用し、高速かつ高精度な文字起こしを実現。
 
-## 必要環境
-- Python 3.8以上
-- GPUがあれば高速（CPUでも可）
+独自クレンジング機能: 独自ロジックにより、文字起こし結果から「えー」「あのー」といったフィラー（無駄な言葉）を自動除去。
 
-## 使い方（基本）
+マルチフォーマット対応: SRT, VTT, TXT, TSV, JSONの全形式をコマンド一つで一括出力可能。
 
-1.スクリプト内の音声ファイルパスを変更
-audio = whisper.load_audio(r"C:\path\to\your\audio.mp4")  # ← ここを自分のファイルに
+実用的なエラー防止: condition_on_previous_text=False を設定し、Whisper特有の「無限ループ（誤認の連鎖）」を防止。
 
-2.実行
-whisper_srt.py→ 同じフォルダに sample.srt（または指定した名前）のSRTファイルが出力されます。
+UXを意識した設計: tqdm による進捗表示と、処理内容のリアルタイムログ出力。
 
-## カスタマイズ例
+## 📋 必要環境
 
-・モデルサイズを変更（精度↑、速度↓）
-  model = whisper.load_model("large-v3")  # medium → large-v3 / turbo など
-  
-・出力ファイル名をカスタム
-　with open("sample.srt", mode="w", encoding="utf-8") as f: ←sampleの部分を出力したい名前に変更可能
+このツールを実行するには、以下の環境が必要です。
 
-・英語音声に変更（日本語以外で使いたい場合）
-  result = model.transcribe(audio, verbose=True, language="en")
+- **Python**: 3.8以上
+- **FFmpeg**: 音声・動画のデコードに必要です
+- **ライブラリ**: 
+  - `openai-whisper`
+  - `torch`
+  - `tqdm`
+
+## 🛠️ 開発のこだわり
+実務レベルの引数設計: argparse を採用し、コードを書き換えずにコマンドラインから操作できる「道具」としての完成度を追求しました。
+
+データ構造の理解: AIの出力結果（辞書型データ）を直接操作し、各セグメントに対して正規表現を用いたテキストクレンジングを実装しました。
+
+環境への適応: CUDA（GPU）が利用可能な場合は自動で検知して高速化し、ない場合はCPUで動作するハイブリッドな設計にしています。
+
+## 🚀 使い方
+準備
+Bash
+pip install openai-whisper torch tqdm
+基本的な実行
+Bash
+python app.py "your_audio_file.mp4"
+フィラー除去をして、全形式で保存する場合
+Bash
+python app.py "your_audio_file.mp4" --clean --format all
+
+## 📂 対応フォーマット
+.srt (字幕ファイル)
+
+.vtt (Web字幕)
+
+.txt (プレーンテキスト)
+
+.tsv / .json (データ解析用)
