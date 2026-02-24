@@ -1,63 +1,80 @@
 import whisper
 from whisper.utils import get_writer
 import os
-import sys
+import argparse
 import torch
+import re
+from tqdm import tqdm
+
+def clean_text(text):
+    """
+    フィラー（えー、あのー等）を削除し、文章を整える関数
+    """
+    # 削除対象のリスト（正規表現を活用）
+    fillers = [
+        r"えーと、?", r"えー、?", r"あのー、?", r"あの、?", 
+        r"えっと、?", r"まー、?", r"そのー、?", r"えー"
+    ]
+    cleaned = text
+    for f in fillers:
+        cleaned = re.sub(f, "", cleaned)
+    
+    # 連続する空白を1つにまとめ、前後の不要な空白を削除
+    cleaned = cleaned.replace("  ", " ").strip()
+    return cleaned
 
 def main():
-    # 1. デバイスの自動検知
-    # GPU (CUDA) があれば使用し、なければ CPU で動作させるハイブリッド仕様
+    # 1. コマンドライン引数の設定
+    # これにより「python app.py ファイル名 --format 形式」という操作が可能になります
+    parser = argparse.ArgumentParser(description="Whisperを用いた高精度・クレンジング機能付き文字起こしツール")
+    parser.add_argument("input_file", help="文字起こししたい音声・動画ファイルのパス")
+    parser.add_argument(
+        "--format", 
+        choices=["all", "srt", "vtt", "txt", "tsv", "json"], 
+        default="srt", 
+        help="出力形式 (デフォルト: srt)"
+    )
+    parser.add_argument(
+        "--clean", 
+        action="store_true", 
+        help="フィラー（えー、あの等）を除去して保存する"
+    )
+    args = parser.parse_args()
+
+    # 2. デバイスの自動判定とモデルロード
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"--- 起動中 (Device: {device}) ---")
-
-    # 2. 実行時引数のチェック
-    # コマンドラインから 'python app.py movie.mp4' のように実行可能
-    if len(sys.argv) < 2:
-        print("エラー: 入力ファイルが指定されていません。")
-        print("使用法: python app.py [ファイルパス]")
-        return
-    
-    audio_path = sys.argv[1]
-    if not os.path.exists(audio_path):
-        print(f"エラー: ファイルが見つかりません: {audio_path}")
-        return
-
-    # 3. モデルのロード
-    # 速度と精度のバランスが最も優れた "turbo" モデルを採用
-    print(f"--- モデル読み込み中 (Model: turbo) ---")
+    print(f"--- 起動環境: {device} ---")
+    print("--- モデル読み込み中 (turbo) ---")
     model = whisper.load_model("turbo", device=device)
 
-    # 4. 文字起こしの実行
-    # 楽曲の認識率向上と、実務での安定性（ハルシネーション対策）を両立した設定
-    print(f"--- 処理開始: {os.path.basename(audio_path)} ---")
+    # 3. 文字起こしの実行
+    print(f"--- 処理開始: {os.path.basename(args.input_file)} ---")
     result = model.transcribe(
-        audio_path,
-        verbose=True,           # 進捗をリアルタイム表示（UX向上）
-        language="ja",          # 日本語に固定して誤認識を防止
-        beam_size=5,            # 探索を深め、歌詞や複雑な文章の精度を向上
-        temperature=0,          # 決定論的な出力を優先（変な「遊び」を抑制）
-        no_speech_threshold=0.6, # 無音部分で勝手に喋り出す現象を抑制
-        condition_on_previous_text=False, # 同じフレーズを繰り返す無限ループを防止
-        initial_prompt="これは正確な日本語の字幕用データです。" # 漢字変換の精度を高めるヒント
+        args.input_file,
+        verbose=True,
+        language="ja",
+        condition_on_previous_text=False # 無限ループ防止
     )
 
-    # 5. 公式ツールによるSRTファイルの保存
-    # ライブラリ依存を減らし、Whisper標準の出力機能を使用して正確なSRTを生成
-    output_dir = os.path.dirname(audio_path) if os.path.dirname(audio_path) else "."
-    
-    # ファイル名（拡張子なし）を取得
-    base_name = os.path.splitext(os.path.basename(audio_path))[0]
-    
-    # 字幕書き出し用のWriterを準備
-    writer = get_writer("srt", output_dir)
-    
-    # 実行（resultデータをSRT形式に整形してファイル保存）
-    writer(result, audio_path)
+    # 4. フィラー除去の適用（オプション）
+    if args.clean:
+        print("✨ フィラー除去を実行中...")
+        # 各セグメント（時間ごとの文章）を掃除
+        for segment in result["segments"]:
+            segment["text"] = clean_text(segment["text"])
+        # 全体テキストも掃除
+        result["text"] = clean_text(result["text"])
 
-    print(f"--- 完了 ---")
-    print(f"保存先: {os.path.join(output_dir, base_name + '.srt')}")
+    # 5. 指定されたフォーマットで書き出し
+    output_dir = os.path.dirname(args.input_file) or "."
+    formats = ["srt", "vtt", "txt", "tsv", "json"] if args.format == "all" else [args.format]
+
+    print(f"💾 {len(formats)}件のファイルを保存しています...")
+    for f in tqdm(formats, desc="Saving"):
+        writer = get_writer(f, output_dir)
+        writer(result, args.input_file)
+
+    print(f"--- すべての処理が完了しました！ ---")
 
 if __name__ == "__main__":
     main()
-
-
